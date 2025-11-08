@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Player Registration | Netball Hub{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-body p-4 p-lg-5">
+                <h1 class="card-title fw-bold mb-4">Netball Player Registration</h1>
+                <form method="post" enctype="multipart/form-data" class="row g-3">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors|striptags }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="col-12">
+                        <label class="form-label">Full Name</label>
+                        {{ form.full_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Date of Birth</label>
+                        {{ form.date_of_birth }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Gender</label>
+                        {{ form.gender }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Playing Position</label>
+                        {{ form.playing_position }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tournament</label>
+                        {{ form.tournament }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Institution / School / College / Village</label>
+                        {{ form.institution_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Photo</label>
+                        {{ form.photo }}
+                        <p class="small text-muted mt-1">Leave blank to use the default player image.</p>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            {{ form.consent_to_play }}
+                            <label class="form-check-label" for="{{ form.consent_to_play.id_for_label }}">
+                                {{ form.consent_to_play.label }}
+                            </label>
+                        </div>
+                        {% if form.consent_to_play.errors %}
+                        <div class="text-danger small">{{ form.consent_to_play.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    {% for field in form %}
+                        {% if field.errors and not field.name == "consent_to_play" %}
+                            <div class="col-12">
+                                <div class="alert alert-danger py-2 mb-0">
+                                    {{ field.label }}: {{ field.errors|striptags }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">Submit Registration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-body p-4 p-lg-5">
+                <h2 class="fw-semibold mb-4">Already Registered?</h2>
+                <p class="text-muted">Locate your registration record using the 4-digit number provided after sign-up.</p>
+                <form
+                    class="mt-4"
+                    hx-get="{% url 'players:search' %}"
+                    hx-target="#search-result"
+                    hx-trigger="submit"
+                >
+                    <div class="input-group input-group-lg">
+                        <input
+                            type="text"
+                            name="registration_number"
+                            class="form-control"
+                            placeholder="Enter 4-digit number"
+                            maxlength="4"
+                            required
+                        >
+                        <button class="btn btn-outline-primary" type="submit">Search</button>
+                    </div>
+                </form>
+                <div id="search-result" class="mt-4">
+                    {% include "players/partials/search_result.html" with player=None %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

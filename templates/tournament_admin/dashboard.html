@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard | Netball Hub{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Administrator Dashboard</h1>
+        <p class="text-muted mb-0">Manage tournaments, create teams, and organize registered players.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'tournament_admin:create_tournament' %}" class="btn btn-outline-primary">New Tournament</a>
+        <a href="{% url 'tournament_admin:create_team' %}" class="btn btn-outline-secondary">New Team</a>
+        <a href="{% url 'tournament_admin:assign_players' %}" class="btn btn-primary">Assign Players</a>
+        <a href="{% url 'tournament_admin:logout' %}" class="btn btn-danger">Logout</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 fw-semibold mb-3">Player Filters</h2>
+                <form method="get" class="d-grid gap-3">
+                    <div>
+                        <label class="form-label">Age Group</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="?{% if category %}category={{ category }}&{% endif %}"
+                               class="btn btn-sm {% if not age_group %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                All
+                            </a>
+                            {% for code in age_filters %}
+                            <a href="?age_group={{ code }}{% if category %}&category={{ category }}{% endif %}"
+                               class="btn btn-sm {% if age_group == code %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                {{ code|upper }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Category</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="?{% if age_group %}age_group={{ age_group }}&{% endif %}"
+                               class="btn btn-sm {% if not category %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                All
+                            </a>
+                            {% for code in category_filters %}
+                            <a href="?category={{ code }}{% if age_group %}&age_group={{ age_group }}{% endif %}"
+                               class="btn btn-sm {% if category == code %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                {{ code|title }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </form>
+
+                <hr>
+                <h2 class="h5 fw-semibold mb-3">Tournaments</h2>
+                <ul class="list-group list-group-flush small">
+                    {% for tournament in tournaments %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <strong>{{ tournament.name }}</strong><br>
+                            <span class="text-muted">{{ tournament.start_date }} - {{ tournament.end_date }}</span>
+                        </span>
+                        <span class="badge {% if tournament.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if tournament.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted fst-italic">No tournaments yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h4 fw-semibold mb-0">Registered Players</h2>
+                        <p class="text-muted mb-0">{{ player_count }} player{{ player_count|pluralize }} matching filters</p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Position</th>
+                                <th>Tournament</th>
+                                <th>Teams</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for player in players %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="{{ player.photo.url }}" alt="{{ player.full_name }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                        <div>
+                                            <div class="fw-semibold">{{ player.full_name }}</div>
+                                            <div class="text-muted small">{{ player.registration_number }}</div>
+                                            <div class="text-muted small">{{ player.institution_name }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ player.age }}</td>
+                                <td>{{ player.get_gender_display }}</td>
+                                <td>{{ player.get_playing_position_display }}</td>
+                                <td>{{ player.tournament.name }}</td>
+                                <td>
+                                    {% with player.teams.all as assigned %}
+                                        {% if assigned %}
+                                            {% for team in assigned %}
+                                                <span class="badge bg-secondary">{{ team.name }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted small">Unassigned</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    No players found for the selected filters.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h2 class="h5 fw-semibold mb-3">Teams Overview</h2>
+                <div class="row g-3">
+                    {% for team in teams %}
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img src="{{ team.logo.url }}" alt="{{ team.name }}" width="50" height="50" style="object-fit: cover;" class="rounded">
+                                <div>
+                                    <div class="fw-semibold">{{ team.name }}</div>
+                                    <div class="text-muted small">{{ team.tournament.name }}</div>
+                                </div>
+                            </div>
+                            <div class="text-muted small mb-2">Mentor: {{ team.mentor|default:"Not set" }}</div>
+                            <div class="small">
+                                {% with team.players.all as assigned_players %}
+                                    {% if assigned_players %}
+                                        {% for player in assigned_players %}
+                                            <span class="badge bg-light text-dark border">{{ player.full_name }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted fst-italic">No players assigned.</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="text-muted fst-italic">No teams created yet.</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

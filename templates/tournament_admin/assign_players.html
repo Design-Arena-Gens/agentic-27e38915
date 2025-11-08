@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Players | Netball Hub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-4 p-lg-5">
+                <h1 class="h4 fw-bold mb-4">Assign Players to Teams</h1>
+                <form method="post" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.tournament.label }}</label>
+                        {{ form.tournament }}
+                        {% if form.tournament.errors %}
+                        <div class="text-danger small">{{ form.tournament.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.team.label }}</label>
+                        {{ form.team }}
+                        {% if form.team.errors %}
+                        <div class="text-danger small">{{ form.team.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">{{ form.players.label }}</label>
+                        {{ form.players }}
+                        <div class="form-text">Hold Ctrl (or Cmd on macOS) to select multiple players.</div>
+                        {% if form.players.errors %}
+                        <div class="text-danger small">{{ form.players.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Assign Players</button>
+                        <a href="{% url 'tournament_admin:dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

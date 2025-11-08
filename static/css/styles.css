@@ -1,0 +1,31 @@
+:root {
+    --primary-color: #0d6efd;
+    --bg-light: #f8f9fa;
+}
+
+body {
+    background-color: var(--bg-light);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.75rem 2rem rgba(13, 110, 253, 0.15);
+}
+
+.registration-number {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: 0.25rem;
+    font-weight: 700;
+}
+
+.badge-category {
+    font-size: 0.9rem;
+}
